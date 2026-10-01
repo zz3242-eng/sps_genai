@@ -7,7 +7,7 @@ RUN pip install --no-cache-dir uv>=0.5.0
 
 # Copy dependency files and install runtime dependencies (spaCy model is a pinned dependency)
 COPY pyproject.toml uv.lock ./
-RUN uv sync --frozen --no-install-project
+RUN uv sync --frozen
 
 # Copy application code
 COPY app ./app

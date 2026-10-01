@@ -2,7 +2,7 @@ from typing import Union
 from fastapi import FastAPI
 from pydantic import BaseModel
 from app.bigram_model import BigramModel
-from app.embedding_model import EmbeddingModel
+from app.embedding_model import calculate_embedding
 
 app = FastAPI()
 
@@ -16,7 +16,6 @@ It tells the story of Edmond Dantès, who is falsely imprisoned and later seeks 
 ]
 
 bigram_model = BigramModel(corpus)
-embedding_model = EmbeddingModel()
 
 class TextGenerationRequest(BaseModel):
     start_word: str
@@ -36,5 +35,5 @@ def generate_text(request: TextGenerationRequest):
 
 @app.post("/embedding")
 def get_embedding(request: EmbeddingRequest):
-    embedding = embedding_model.get_embedding(request.query)
+    embedding = calculate_embedding(request.query)
     return {"query": request.query, "embedding": embedding}
