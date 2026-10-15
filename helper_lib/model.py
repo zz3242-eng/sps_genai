@@ -69,6 +69,29 @@ class EnhancedCNN(nn.Module):
         return x
 
 
+class ArchCNN(nn.Module):
+    """CNN matching the Assignment 2 Part 1 architecture spec (64x64x3 input):
+    Conv(16,3x3,s1,p1) -> ReLU -> Pool(2x2,s2) -> Conv(32,3x3,s1,p1) -> ReLU ->
+    Pool(2x2,s2) -> Flatten -> FC(100) -> ReLU -> FC(10).
+    """
+
+    def __init__(self):
+        super(ArchCNN, self).__init__()
+        self.conv1 = nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1)
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.conv2 = nn.Conv2d(16, 32, kernel_size=3, stride=1, padding=1)
+        self.fc1 = nn.Linear(32 * 16 * 16, 100)
+        self.fc2 = nn.Linear(100, NUM_CLASSES)
+
+    def forward(self, x):
+        x = self.pool(F.relu(self.conv1(x)))
+        x = self.pool(F.relu(self.conv2(x)))
+        x = x.view(-1, 32 * 16 * 16)
+        x = F.relu(self.fc1(x))
+        x = self.fc2(x)
+        return x
+
+
 def get_model(model_name):
     if model_name == "FCNN":
         model = MLP()
@@ -76,6 +99,8 @@ def get_model(model_name):
         model = SimpleCNN()
     elif model_name == "EnhancedCNN":
         model = EnhancedCNN()
+    elif model_name == "ArchCNN":
+        model = ArchCNN()
     else:
         raise ValueError(f"Unknown model_name: {model_name}")
     return model
