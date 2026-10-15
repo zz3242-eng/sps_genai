@@ -70,11 +70,6 @@ class EnhancedCNN(nn.Module):
 
 
 class ArchCNN(nn.Module):
-    """CNN matching the Assignment 2 Part 1 architecture spec (64x64x3 input):
-    Conv(16,3x3,s1,p1) -> ReLU -> Pool(2x2,s2) -> Conv(32,3x3,s1,p1) -> ReLU ->
-    Pool(2x2,s2) -> Flatten -> FC(100) -> ReLU -> FC(10).
-    """
-
     def __init__(self):
         super(ArchCNN, self).__init__()
         self.conv1 = nn.Conv2d(3, 16, kernel_size=3, stride=1, padding=1)
