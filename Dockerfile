@@ -11,6 +11,8 @@ RUN uv sync --frozen
 
 # Copy application code
 COPY app ./app
+COPY helper_lib ./helper_lib
+COPY cnn_model.pth ./cnn_model.pth
 
 EXPOSE 8000
 
