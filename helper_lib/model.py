@@ -86,6 +86,39 @@ class ArchCNN(nn.Module):
         x = self.fc2(x)
         return x
 
+class Generator(nn.Module):
+    def __init__(self):
+        super(Generator, self).__init__()
+        self.fc = nn.Linear(100, 7 * 7 * 128)
+        self.deconv1 = nn.ConvTranspose2d(128, 64, kernel_size=4, stride=2, padding=1)
+        self.bn1 = nn.BatchNorm2d(64)
+        self.deconv2 = nn.ConvTranspose2d(64, 1, kernel_size=4, stride=2, padding=1)
+        self.tanh = nn.Tanh()
+
+    def forward(self, x):
+        x = self.fc(x)
+        x = x.view(-1, 128, 7, 7)
+        x = F.relu(self.bn1(self.deconv1(x)))
+        x = self.tanh(self.deconv2(x))
+        return x
+
+
+class Discriminator(nn.Module):
+    def __init__(self):
+        super(Discriminator, self).__init__()
+        self.conv1 = nn.Conv2d(1, 64, kernel_size=4, stride=2, padding=1)
+        self.conv2 = nn.Conv2d(64, 128, kernel_size=4, stride=2, padding=1)
+        self.bn2 = nn.BatchNorm2d(128)
+        self.fc = nn.Linear(128 * 7 * 7, 1)
+
+    def forward(self, x):
+        x = F.leaky_relu(self.conv1(x), 0.2)
+        x = F.leaky_relu(self.bn2(self.conv2(x)), 0.2)
+        x = x.view(-1, 128 * 7 * 7)
+        x = self.fc(x)
+        return x
+
+
 
 def get_model(model_name):
     if model_name == "FCNN":
@@ -96,6 +129,10 @@ def get_model(model_name):
         model = EnhancedCNN()
     elif model_name == "ArchCNN":
         model = ArchCNN()
+    elif model_name == "GAN":
+        generator = Generator()
+        discriminator = Discriminator()
+        model = (generator, discriminator)
     else:
         raise ValueError(f"Unknown model_name: {model_name}")
     return model
