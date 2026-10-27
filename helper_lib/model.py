@@ -119,7 +119,6 @@ class Discriminator(nn.Module):
         return x
 
 
-
 def get_model(model_name):
     if model_name == "FCNN":
         model = MLP()

@@ -2,10 +2,11 @@ from typing import Union
 import io
 
 import torch
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Response
 from pydantic import BaseModel
 from PIL import Image
 from torchvision import transforms
+from torchvision.utils import make_grid
 
 from app.bigram_model import BigramModel
 from app.embedding_model import calculate_embedding
@@ -29,6 +30,10 @@ CLASSES = ["airplane", "automobile", "bird", "cat", "deer", "dog", "frog", "hors
 cnn_model = get_model("CNN")
 cnn_model = load_model(cnn_model, "cnn_model.pth", device="cpu")
 cnn_model.eval()
+
+gan_generator, _ = get_model("GAN")
+gan_generator = load_model(gan_generator, "generator.pth", device="cpu")
+gan_generator.eval()
 
 class TextGenerationRequest(BaseModel):
     start_word: str
@@ -65,3 +70,18 @@ async def classify_image(file: UploadFile = File(...)):
     predicted_class = CLASSES[predicted.item()]
 
     return {"predicted_class": predicted_class}
+
+@app.post("/generate_digit")
+def generate_digit(num_samples: int = 10):
+    noise = torch.randn(num_samples, 100)
+    with torch.no_grad():
+        images = gan_generator(noise)
+
+    grid = make_grid(images, nrow=5, normalize=True)
+    ndarr = grid.mul(255).byte().permute(1, 2, 0).numpy()
+    img = Image.fromarray(ndarr)
+
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+
+    return Response(content=buf.getvalue(), media_type="image/png")
